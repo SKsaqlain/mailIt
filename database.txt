@@ -8,10 +8,10 @@ $docker pull mysql/mysql-server:latest
 $docker run --name db -e MYSQL_ROOT_HOST=% -p 3306:3306 -d mysql/mysql-server
 
 3)get the default password(//copy the shown password//)
-$docker logs mysql1 2>&1
+$docker logs db 2>&1
 
 4)paste the password  here
-$docker exec -it mysql1 mysql -u root -p 
+$docker exec -it db mysql -u root -p 
 
 5)change the default password
 >>ALTER USER 'root'@'localhost' IDENTIFIED BY '123';
