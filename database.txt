@@ -24,5 +24,5 @@ $docker exec -it db mysql -u root -p
 6)create database
 >>create database mailIt;
 >>use mailIt;
->>create table email(id INT AUTO_INCREMENT PRIMARY KEY,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,spam INT DEFAULT 0,start INT DEFAULT 0); 
+>>create table email(id INT AUTO_INCREMENT PRIMARY KEY,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,spam INT DEFAULT 0,star INT DEFAULT 0); 
 >>create table user(email VARCHAR(100) PRIMARY KEY ,username VARCHAR(100) NOT NULL,password VARCHAR(100) NOT NULL);
