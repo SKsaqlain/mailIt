@@ -1,10 +1,12 @@
 from flask import Flask,request,jsonify,json
 import pymysql
 import requests
-
+from flask_cors import CORS
 
 app=Flask(__name__)
-db=pymysql.connect('192.168.0.107','root','123','mailIt')
+CORS(app)
+
+db=pymysql.connect('192.168.0.106','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
 
 
@@ -24,4 +26,35 @@ def login():
 		resp=jsonify(["login-failed"])
 		resp.status_code=400
 		return resp
+
+#function to get all the emails received by a user.
+#200-success|400-failure
+@app.route("/getData/<email>",methods=['GET'])
+def getData(email):
+	print(email)
+	#query to extract all the emails received
+	sql="select send_email,subject,body,date,spam,star from email where recv_email='%s'"%(str(email))
+	cursor.execute(sql)
+	rows=cursor.fetchall()
+	resp=jsonify()
+	message=[]
+	if(len(rows)>0):
+		for row in  rows:
+			print(type(row),row)
+			l=dict();
+			l['send_email']=row['send_email']
+			l['subject']=row['subject']
+			l['body']=row['body']
+			l['date']=row['date']
+			l['spam']=row['spam']
+			l['star']=row['star']
+			message.append(l)
+		resp.status_code=200
+	else:
+		resp.status_code=400
+	resp=jsonify(message)
+	return resp
+	
+	return resp
+
 app.run(debug=True,host="0.0.0.0",port=1000)

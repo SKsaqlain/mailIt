@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>mailIt</title>
+</head>
+<script type="text/javascript">
+	function obj()
+	{
+		xhr=new XMLHttpRequest();
+		this.getData=function()
+		{	//user state information is stored in localStorage
+			var email=localStorage.getItem("email");
+			xhr.open('GET','http://127.0.0.1:1000/getData/'+email,true);
+			xhr.onreadystatechange=function()
+			{
+				if(this.readyState==4)
+				{
+					if(this.status==200)
+					{
+						var data=JSON.parse(this.responseText);
+						console.log(data[0]['send_email']);
+					}
+					else
+					{
+						alert("Failed to load data ~x~");
+					}
+				}
+			}
+			xhr.send();
+		}
+	}
+	var loader=new obj();
+</script>
+<body onload="loader.getData()">
+	<table id="mailMatrix">
+	</table>
+	
+</body>
+</html>
