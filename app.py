@@ -6,7 +6,7 @@ from flask_cors import CORS
 app=Flask(__name__)
 CORS(app)
 
-db=pymysql.connect('192.168.0.106','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
+db=pymysql.connect('192.168.43.85','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
 
 
@@ -56,5 +56,31 @@ def getData(email):
 	return resp
 	
 	return resp
+
+@app.route("/signup",methods=['POST','GET'])
+def signup():
+	if(request.method=="POST"):
+		username=request.form['username']
+		password=request.form["password"]
+		email=request.form["email"]
+		print(username,password,email)
+		message={}
+		resp=jsonify(message)
+		resp.status_code=200
+		return resp
+	elif(request.method=="GET"):
+		email=request.args["email"]
+		sql="select * from user where email='%s'"%(email)
+		resp=""
+		if(cursor.execute(sql)>0):
+			resp=jsonify({})
+			resp.status_code=400
+		else:
+			resp=jsonify({})
+			resp.status_code=200
+		return resp
+
+	else:
+		pass
 
 app.run(debug=True,host="0.0.0.0",port=1000)
