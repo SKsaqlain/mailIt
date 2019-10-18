@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>logIn</title>
+</head>
+<script type="text/javascript">
+	function check_email(){
+
+		var email=document.getElementById("email").value.toLowerCase();
+		splitted_email=email.split("@");
+		if(splitted_email[1]!="mailit.com")
+		{	//css
+			alert("wrong domain");
+		}
+		else
+		{
+			var xhr=new XMLHttpRequest();
+			var url="http://127.0.0.1:1000/signup?email="+email;
+			
+			xhr.open('GET',url,true);
+			//storing the state information of the user.
+			localStorage.setItem("email",document.getElementById("email").value);
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4){
+					if(xhr.status == 200) {
+						console.log("unique-email")
+						localStorage.setItem("email",email);
+			    	}
+			    	else if(xhr.status==400)
+			    	{	//css
+			    		alert("email already exists");
+			    	}
+			    	else
+			    	{	//css
+			    		console.log("some error");
+			    	}
+				}
+			}
+		}
+
+		
+		xhr.send();
+		//console.log("sent");
+	}
+</script>
+<body>
+	<form method="post" action="http://127.0.0.1:1000/signup">
+		<label>Username</label><input type="name" name="username" id="username" required><br/>
+		<label>Email</label><input type="email" name="email" id="email" onblur="check_email()" required><br/>
+		<label>Password</label><input type="password" name="password" id="password" required><br/>
+		<input type="submit" value="submit"><br/>
+		
+	</form>
+</body>
+</html> 

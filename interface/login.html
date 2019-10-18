@@ -4,45 +4,60 @@
 	<title>logIn</title>
 </head>
 <script type="text/javascript">
-	function send_form(){
-		var xhr=new XMLHttpRequest();
-		var url="http://127.0.0.1:1000/login";
-		console.log(document.getElementById("email").value);
-		console.log(document.getElementById("password").value)
-		var params="email="+document.getElementById("email").value+"&password="+document.getElementById("password").value;
-		xhr.open('POST',url,true);
-		xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-		//storing the state information of the user.
-		localStorage.setItem("email",document.getElementById("email").value);
-		xhr.onreadystatechange = function() {
-		    if(xhr.readyState == 4){
-				if(xhr.status == 200) {
-
-		        	window.location.assign("home.html")
-		        	// document.writeln("success");
-		    	}
-		    	else if(xhr.status==400)
-		    	{
-		    	alert("incorrect email or password");
-		    	}
-		    	else
-		    	{
-		    		console.log("some error");
-		    	}
-			}
+	function check_domain()
+	{	email=document.getElementById("email").value.toLowerCase();
+		splitted_email=email.split("@");
+		console.log(splitted_email[1]);
+		if(splitted_email[1]!="mailit.com")
+		{	//css
+			alert("wrong domain");
+			return false;
 		}
-		
-		xhr.send(params);
-		console.log("sent");
+		return true;
+	}
+	function send_form(){
+		if(check_domain())
+		{ var email=document.getElementById("email").value.toLowerCase();
+			var password=document.getElementById("password").value;
+			var xhr=new XMLHttpRequest();
+			var url="http://127.0.0.1:1000/login";
+			// console.log(document.getElementById("email").value);
+			// console.log(document.getElementById("password").value)
+			var params="email="+email+"&password="+password;
+			xhr.open('POST',url,true);
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			//storing the state information of the user.
+			localStorage.setItem("email",email);
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4){
+					if(xhr.status == 200) {
+
+			        	window.location.assign("home.html")
+			        	// document.writeln("success");
+			    	}
+			    	else if(xhr.status==400)
+			    	{	
+			    		alert("incorrect email or password");
+			    	}
+			    	else
+			    	{
+			    		console.log("some error");
+			    	}
+				}
+			}
+			
+			xhr.send(params);
+			console.log("sent");
+		}	
 	}
 </script>
 <body>
 	<form>
-		<label>Email</label><input type="email" name="email" id="email"><br/>
-		<label>Password</label><input type="password" name="password" id="password"><br/>
+		<label>Email</label><input type="email" name="email" id="email" onblur="check_domain()" required><br/>
+		<label>Password</label><input type="password" name="password" id="password" required><br/>
 		<input type="button" value="submit" onclick="send_form()"><br/>
 		<a href="create_account.html">create account</a>
 	</form>
-	<iframe src="" height="0px" width="0" style="visibility: hidden;" name="iframe"></iframe>
 </body>
+
 </html> 
