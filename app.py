@@ -6,7 +6,7 @@ from flask_cors import CORS
 app=Flask(__name__)
 CORS(app)
 
-db=pymysql.connect('192.168.43.85','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
+db=pymysql.connect('192.168.0.107','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
 
 
@@ -82,5 +82,16 @@ def signup():
 
 	else:
 		pass
+@app.route("/compose_send",methods=["POST"])
+def compose_send():
+	req_data=request.get_json()
+	print(req_data)
+	sql="insert into email(send_email,recv_email,subject,body) values('%s','%s','%s','%s')"%(req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
+	if(cursor.execute(sql)>0):
+		print("email sent")
+	db.commit()
+	resp=jsonify({})
+	resp.status_code=200
+	return resp
 
 app.run(debug=True,host="0.0.0.0",port=1000)
