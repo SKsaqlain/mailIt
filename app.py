@@ -3,11 +3,27 @@ import pymysql
 import requests
 from flask_cors import CORS
 
+
+
+
+import re
+import string
+import math
+import json
+import pickle
+from sklearn import feature_extraction, model_selection, naive_bayes, metrics, svm
+from spam_filter2 import SpamDetector,predict
+import time
+import threading
+
+
+
 app=Flask(__name__)
 CORS(app)
 
-db=pymysql.connect('192.168.0.107','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
+db=pymysql.connect('192.168.0.105','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
+
 
 
 #200-success #400-login failed.
@@ -82,16 +98,65 @@ def signup():
 
 	else:
 		pass
+
+#send email
 @app.route("/compose_send",methods=["POST"])
 def compose_send():
 	req_data=request.get_json()
 	print(req_data)
-	sql="insert into email(send_email,recv_email,subject,body) values('%s','%s','%s','%s')"%(req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
+	#genereating id 
+	id_=0
+	sql="select max(id) from email"
+	if(cursor.execute(sql)>0):
+		id_=int(cursor.fetchone()['max(id)'])+1
+	sql="insert into email(id,send_email,recv_email,subject,body) values(%d,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
 	if(cursor.execute(sql)>0):
 		print("email sent")
+	#inserting data into spam_log database  to be check for later
+	sql="insert into spam_check_log values('%d')"%(id_)
+	if(cursor.execute(sql)>0):
+		print("emailed logged for further check")
 	db.commit()
 	resp=jsonify({})
 	resp.status_code=200
 	return resp
 
+
+def spam_check():
+	while(1):
+		print("Spam check active")
+		sql="select * from spam_check_log"
+		if(cursor.execute(sql)>0):
+			ids=list(cursor.fetchall()[0].values())
+			sql="select id,subject,body from  email where id in (%s)"%(','.join(list(map(str,ids))))
+			if(len(ids)>0 and cursor.execute(sql)>0):
+				data=cursor.fetchall()
+				data_list=list()
+				#order of ids
+				ids=list()
+				for ele in data:
+					#print(ele)
+					ids.append(ele['id'])
+					data_list.append("Subject:{}\n{}".format(ele["subject"],ele["body"]))
+
+				#checking whether the mailes are spam or not.
+				labels=predict(data_list)
+				print("labels {}".format(labels))
+				spam_id=[val for i,val in enumerate(ids) if labels[i]==1]
+				sql="update email set spam=1 where id in ('%s')"%(','.join(list(map(str,spam_id))))
+				if(cursor.execute(sql)>0):
+					print("spam set")
+				db.commit()
+				
+				#deleting entires from  spma_check_log file
+				sql="delete from spam_check_log where id in ('%s')"%(','.join(list(map(str,spam_id))))
+				if(cursor.execute(sql)>0):
+					print("log cleared")
+				db.commit()
+
+		time.sleep(2)
+		print("Spam check done")
+
+t=threading.Thread(target=spam_check)
+t.start()
 app.run(debug=True,host="0.0.0.0",port=1000)
