@@ -1,10 +1,13 @@
-from flask import Flask,request,jsonify,json
+from flask import Flask,flash,request,jsonify,json,redirect, render_template,url_for
 import pymysql
 import requests
 from flask_cors import CORS
 
-
-
+import os
+#import magic
+import urllib.request
+# from app import app
+from werkzeug.utils import secure_filename
 
 import re
 import string
@@ -24,7 +27,7 @@ CORS(app)
 db=pymysql.connect('192.168.0.105','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
 
-
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 #200-success #400-login failed.
 @app.route("/login",methods=['POST'])
@@ -153,10 +156,46 @@ def spam_check():
 				if(cursor.execute(sql)>0):
 					print("log cleared")
 				db.commit()
+		else:
+			print("EMPTY LOG")
 
-		time.sleep(2)
+		time.sleep(10)
 		print("Spam check done")
 
-t=threading.Thread(target=spam_check)
-t.start()
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+	
+@app.route('/editor')
+def upload_form():
+	# return render_template('upload.html')
+	return render_template("online-editor.html")
+
+@app.route('/editor', methods=['POST'])
+def upload_file():
+	# print("here")
+	if request.method == 'POST':
+        # check if the post request has the file part
+		if 'file' not in request.files:
+			flash('No file part')
+			return redirect(request.url)
+		file = request.files['file']
+		if file.filename == '':
+			flash('No file selected for uploading')
+			return redirect(request.url)
+		if file and allowed_file(file.filename):
+			filename = secure_filename(file.filename)
+			file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+			print(file_path)
+			file.save(file_path)
+			flash('File successfully uploaded')
+			message=[file_path]
+			resp=jsonify(message)
+			resp.status_code=200
+			return resp
+		else:
+			flash('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
+			return redirect(request.url)
+# t=threading.Thread(target=spam_check)
+# t.start()
 app.run(debug=True,host="0.0.0.0",port=1000)
