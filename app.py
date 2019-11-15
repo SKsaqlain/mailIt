@@ -20,7 +20,6 @@ import time
 import threading
 
 
-
 app=Flask(__name__)
 CORS(app)
 #session key has to  be set other wise files wont be uploaded.
@@ -120,22 +119,24 @@ def getData(email):
 #use longpooling to get the latest mails.
 @app.route("/getData/<email>/<date>/latest",methods=['GET'])
 def getLatestData(email,date):
-	# date=request.args["date"]
-	#query to extract all the emails received
-	sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' and date>'%s' order by date desc"%(str(email),date)
-	cursor.execute(sql)
-	rows=cursor.fetchall()
-	resp=jsonify()
-	message=[]
-	if(len(rows)>0):
-		# print(type(rows))
-		message=rows
-		resp.status_code=200
-	else:
-		resp.status_code=400
+	for i in range(5):
+		# date=request.args["date"]
+		#query to extract all the emails received
+		sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' and date>'%s' order by date desc"%(str(email),date)
+		cursor.execute(sql)
+		rows=cursor.fetchall()
+		resp=jsonify()
+		message=[]
+		if(len(rows)>0):
+			# print(type(rows))
+			message=rows
+			resp.status_code=200
+			return resp
+		else:
+			#checck for latest mails after 1 seconds
+			time.sleep(1)
 	resp=jsonify(message)
-	return resp
-	
+	resp.status_code=400
 	return resp
 
 
