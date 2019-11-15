@@ -44,6 +44,10 @@ def redirect_create_account():
 def redirect_home():
 	return  render_template("home.html")
 
+@app.route("/compose")
+def compose():
+	return render_template("compose.html")
+
 #200-success #400-login failed.
 @app.route("/login",methods=['POST'])
 def login():

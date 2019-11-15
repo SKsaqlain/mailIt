@@ -1,11 +1,6 @@
-<!DOCTYPE html>
 <html>
-<head>
-	<title>home</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style type="text/css">
-
+    <head>
+        <style>
 #editor-container {
     border: 1px solid #cccccc;
     display: inline-block;
@@ -42,164 +37,10 @@
     max-width: 250px;
 }
 
-td{
-    border:0px;
-    background-color:rgb(192, 230, 231);
-    font-family: "arial";
-}
-
-.checked{
-    color:orange;
-}
-.uncheck{
-    color:white;
-}
-table{
-    /* width:"100%"; */
-    border:"5px solid darkblue";
-    
-    
-    background-color:aquamarine;
-}
-</style>
-
-</head>
-<script type="text/javascript">
-	function obj()
-	{
-		xhr=new XMLHttpRequest();
-		//function to display email data
-		this.getData=function()
-		{	//user state information is stored in localStorage
-			var email=localStorage.getItem("email");
-			
-			xhr.open('GET','/getData/'+email,true);
-			xhr.onreadystatechange=function()
-			{
-				if(this.readyState==4)
-				{
-					if(this.status==200)
-					{
-						var data=JSON.parse(this.responseText);
-						var rmail_disp=document.getElementById("rmail_disp");
-						if(data.length>0)
-						{
-							for(var i=0;i<data.length;i++)
-							{
-								var mail=data[i];
-								var table=document.createElement("table");
-								table.id=mail["id"];
-                                table.style.width="100%";
-                                table.style.textAlign="center";
-                                table.style.padding="5px";
-                                
-									tr=document.createElement("tr");
-									
-										td=document.createElement("td");
-                                        td.class="table-data";
-										td.innerHTML=mail["send_email"];
-										tr.appendChild(td);
-
-										td=document.createElement("td");
-										td.innerHTML=mail["subject"];
-										tr.appendChild(td);
-
-										td=document.createElement("td");
-										if(mail["spam"]){
-                                            td.innerHTML="Spam";
-                                            td.style.font="red";
-                                        }
-                                        else{
-                                            td.innerHTML="Not Spam";
-                                        }
-										tr.appendChild(td);
-
-										/*td=document.createElement("td");
-										if(mail["star"]){
-                                            star=document.createElement("span");
-                                            star.class="fa fa-star checked";
-                                            td.appendChild(star);
-                                        }
-                                        else{
-                                            star=document.createElement("span");
-                                            star.class="fa fa-star checked";
-                                            td.appendChild(star);
-                                        }
-										tr.appendChild(td);*/
-
-                                        td=document.createElement("td");
-										if(mail["star"]){
-                                            td.innerHTML="Starred";
-                                            td.style.font="golden";
-                                        }
-                                        else{
-                                            td.innerHTML="Star?";
-                                            // td.style.font=;
-                                        }
-										tr.appendChild(td);
-										td=document.createElement("td");
-										td.innerHTML=mail["date"];
-										tr.appendChild(td);
-									table.appendChild(tr);
-
-									tr=document.createElement("tr");
-									tr.colspan=5
-										td=document.createElement("td");
-										console.log(mail["body"]);
-										parser=new DOMParser();
-										body=parser.parseFromString(mail["body"],'text/xml');
-											td.appendChild(body.documentElement);
-											//changing the id so the editor functions are not applied here
-											td.childNodes[0].id="mail_body";
-										tr.appendChild(td);
-									table.appendChild(tr)
-								rmail_disp.appendChild(table);
-							}
-						}
-					}
-					else
-					{
-						alert("Failed to load data ~x~");
-					}
-				}
-			}
-			xhr.send();
-		}
-		this.check_email=function(i){
-			var email=i.value.toLowerCase();
-			splitted_email=email.split("@");
-			if(splitted_email[1]!="mailit.com")
-			{	//css
-				alert("wrong domain");
-			}
-			else
-			{
-				var xhr=new XMLHttpRequest();
-				var url="/signup?email="+email;
-				xhr.open('GET',url,true);
-				xhr.onreadystatechange = function() {
-				    if(xhr.readyState == 4){
-						if(xhr.status == 200) {
-							alert("email does not exists");
-				    	}
-				    	else if(xhr.status==400)
-				    	{	//css
-				    		console.log("email exists");
-				    	}
-				    	else
-				    	{	//css
-				    		console.log("some error");
-				    	}
-					}
-				}
-				xhr.send();
-			}
-
-		}
-        
-
-	}
-function send_email(i)
+        </style>
+    </head>
+    <script>
+        function send_email(i)
 {   //serializing data
     x=new XMLSerializer();
     var data=document.getElementById("editor-text");
@@ -225,6 +66,7 @@ function send_email(i)
         if(this.status==200)
         {
             alert("mail send");
+            window.close();
         }
         else
         {
@@ -238,40 +80,6 @@ function send_email(i)
 
 
 }
-function compose(){
-            open("/compose","", "height=600,width=600,scrollbars=yes");
-        }
-
-
-loader=new obj();
-</script>
-<body onload="loader.getData()">
-    <div id="rmail_disp">
-    </div>
-
-    <div>
-        <button onclick="compose(this)">Compose Mail</button>
-    </div>
-<!-- 
-    <div id="editor-container" style="margin-top:100px">
-    <div id="editor-menu">
-        <button id="bold-button" title="Bold">Bold</button>
-        <button id="underline-button" title="Underline">Underline</button>
-        <button id="list-button" title="Bullet List">List</button>
-        <button id="image-button" title="Picture">Attachments</button>
-        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
-            <input  type="file" name="file" autocomplete="off" required>
-        </form>
-        <br/>
-        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required>
-        <br/>
-        <input type="text" id="subject" name="subject" placeholder="Subject">
-    </div>
-    <div id="editor-text" contenteditable="true" spellcheck="false"></div>
-</div> -->
-
-<!-- <script>
-
 // Bold menu
 document.querySelector('#bold-button').addEventListener('click', function() {
     document.execCommand('bold');
@@ -430,9 +238,26 @@ function FindCurrentTags() {
         document.querySelector("#list-button").classList.remove("highight-menu");
 }
 
-</script>
- -->
 
+    </script>
+    <body>
+            <div id="editor-container" style="margin-top:100px">
+                    <div id="editor-menu">
+                        <button id="bold-button" title="Bold">Bold</button>
+                        <button id="underline-button" title="Underline">Underline</button>
+                        <button id="list-button" title="Bullet List">List</button>
+                        <button id="image-button" title="Picture">Attachments</button>
+                        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
+                            <input  type="file" name="file" autocomplete="off" required>
+                        </form>
+                        <br/>
+                        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required>
+                        <br/>
+                        <input type="text" id="subject" name="subject" placeholder="Subject">
+                    </div>
+                    <div id="editor-text" contenteditable="true" spellcheck="false"></div>
+                </div>
+           
 <!-- #converting DOM to xmlSTRING    SERIALIZE
 
 x=new XMLSerializer();
@@ -445,10 +270,8 @@ body=parser.parseFromString(body,'text/xml');
 document.getElementById("editor-text").appendChild(body.documentElement);
  
  -->
-    <!-- <button onclick="send_email(this)">SEND</button>
-    <br/> -->
-   
-
-
-</body>
+    <button onclick="send_email(this)">SEND</button>
+    <br/>
+        
+    </body>
 </html>
