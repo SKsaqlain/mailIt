@@ -1,5 +1,5 @@
 # mailIt
 mailing application
 
-run app.py
+run app.py <br/>
 open localhost:1000/
