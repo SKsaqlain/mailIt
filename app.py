@@ -117,6 +117,26 @@ def getData(email):
 	
 	return resp
 
+#use longpooling to get the latest mails.
+@app.route("/getData/<email>/<date>/latest",methods=['GET'])
+def getLatestData(email,date):
+	# date=request.args["date"]
+	#query to extract all the emails received
+	sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' and date>'%s' order by date desc"%(str(email),date)
+	cursor.execute(sql)
+	rows=cursor.fetchall()
+	resp=jsonify()
+	message=[]
+	if(len(rows)>0):
+		# print(type(rows))
+		message=rows
+		resp.status_code=200
+	else:
+		resp.status_code=400
+	resp=jsonify(message)
+	return resp
+	
+	return resp
 
 
 #send email
