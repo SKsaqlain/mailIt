@@ -144,6 +144,80 @@ def compose_send():
 	resp.status_code=200
 	return resp
 
+@app.route("/delete_mail/<mid>",methods=["DELETE"])
+def delete_mail(mid):
+	
+	mail_id=mid
+	print(mail_id)
+	sql="delete from spam_check_log where id='%s'"%(mail_id)
+	if(cursor.execute(sql)>0):
+		print("deleted from spam_check_log")
+		db.commit()
+	sql="delete from email where id='%s'"%(mail_id)
+	if(cursor.execute(sql)>0):
+		print("mail deleted")
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=200
+		return  resp
+	else:
+		resp=jsonify({})
+		resp.status_code=400
+		return  resp
+
+#function to star or un-star a mail
+@app.route("/star/<mid>",methods=["GET"])
+def star(mid):
+	print(mid)
+	sql='''update email set star=	CASE  
+									when star=1 then 0
+									when star=0 then 1
+									end
+			where id=%s'''%(mid)
+	resp=jsonify()
+	if(cursor.execute(sql)>0):
+		print("mail stared/un-stared")
+		db.commit()
+		resp.status_code=200
+		return  resp
+	else:
+		resp.status_code=400
+		return resp
+
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS	
+
+@app.route('/editor', methods=['POST'])
+def upload_file():
+	# print("here")
+	message={}
+	resp=jsonify(message)
+	if request.method == 'POST':
+        # check if the post request has the file part
+		if 'file' not in request.files:
+			print('No file part')
+			resp.status_code=400
+			return resp
+		file = request.files['file']
+		if file.filename == '':
+			print('No file selected for uploading')
+			resp.status_code=400
+			return resp
+		if file and allowed_file(file.filename):
+			filename = secure_filename(file.filename)
+			file_path=app.config['UPLOAD_FOLDER']+"/"+filename
+			print(file_path)
+			file.save(file_path)
+			print('File successfully uploaded')
+			message=[file_path]
+			resp=jsonify(message)
+			resp.status_code=200
+			return resp
+		else:
+			print('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
+			resp.status_code=400
+			return resp
 
 def spam_check():
 	while(1):
@@ -183,39 +257,6 @@ def spam_check():
 		print("Spam check done")
 
 
-def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS	
-
-@app.route('/editor', methods=['POST'])
-def upload_file():
-	# print("here")
-	message={}
-	resp=jsonify(message)
-	if request.method == 'POST':
-        # check if the post request has the file part
-		if 'file' not in request.files:
-			print('No file part')
-			resp.status_code=400
-			return resp
-		file = request.files['file']
-		if file.filename == '':
-			print('No file selected for uploading')
-			resp.status_code=400
-			return resp
-		if file and allowed_file(file.filename):
-			filename = secure_filename(file.filename)
-			file_path=app.config['UPLOAD_FOLDER']+"/"+filename
-			print(file_path)
-			file.save(file_path)
-			print('File successfully uploaded')
-			message=[file_path]
-			resp=jsonify(message)
-			resp.status_code=200
-			return resp
-		else:
-			print('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
-			resp.status_code=400
-			return resp
 # t=threading.Thread(target=spam_check)
 # t.start()
 app.run(debug=True,host="0.0.0.0",port=1000)
