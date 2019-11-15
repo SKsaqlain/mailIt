@@ -46,14 +46,10 @@
 
 </head>
 <script type="text/javascript">
-	// addr="<?php echo $_SERVER['SERVER_ADDR'];?>";
-	// if(addr=="::1")
-	// 	add="localhost"
-	// console.log(addr);
-	// addr=localStorage.getItem("addr");
 	function obj()
 	{
 		xhr=new XMLHttpRequest();
+		//function to display email data
 		this.getData=function()
 		{	//user state information is stored in localStorage
 			var email=localStorage.getItem("email");
@@ -66,8 +62,51 @@
 					if(this.status==200)
 					{
 						var data=JSON.parse(this.responseText);
+						var rmail_disp=document.getElementById("rmail_disp");
 						if(data.length>0)
-							console.log(data[0]['send_email']);
+						{
+							for(var i=0;i<data.length;i++)
+							{
+								var mail=data[i];
+								var table=document.createElement("table");
+								table.id=mail["id"];
+									tr=document.createElement("tr");
+									
+										td=document.createElement("td");
+										td.innerHTML=mail["send_email"];
+										tr.appendChild(td);
+
+										td=document.createElement("td");
+										td.innerHTML=mail["subject"];
+										tr.appendChild(td);
+
+										td=document.createElement("td");
+										td.innerHTML=mail["spam"];
+										tr.appendChild(td);
+
+										td=document.createElement("td");
+										td.innerHTML=mail["star"];
+										tr.appendChild(td);
+
+										td=document.createElement("td");
+										td.innerHTML=mail["date"];
+										tr.appendChild(td);
+									table.appendChild(tr);
+
+									tr=document.createElement("tr");
+									tr.colspan=5
+										td=document.createElement("td");
+										console.log(mail["body"]);
+										parser=new DOMParser();
+										body=parser.parseFromString(mail["body"],'text/xml');
+											td.appendChild(body.documentElement);
+											//changing the id so the editor functions are not applied here
+											td.childNodes[0].id="mail_body";
+										tr.appendChild(td);
+									table.appendChild(tr)
+								rmail_disp.appendChild(table);
+							}
+						}
 					}
 					else
 					{
@@ -108,49 +147,51 @@
 			}
 
 		}
-		this.send_email=function()
-		{
-			xhr.open("POST","/compose_send",true);
-			xhr.setRequestHeader("Content-Type","application/json;charset=UTF-8");
-			xhr.onreadystatechange=function()
-			{
-				if(this.readyState==4 && this.status==200)
-				{
-					console.log("message delivered");
-				}
-				else
-				{
-					console.log("message failed to be delivered");
-				}
-			};
-			data={
-				"send_email":localStorage.getItem("email"),
-				"recv_email":document.getElementById("recv_email").value,"subject":document.getElementById("subject").value,"body":document.getElementById("body").value
-			};
-
-			xhr.send(JSON.stringify(data));
-		}
+		
 
 	}
-	loader=new obj();
+function send_email(i)
+{   //serializing data
+    x=new XMLSerializer();
+    var data=document.getElementById("editor-text");
+    // data.id="some_data";
+    editor_body=x.serializeToString(data);
+    console.log(editor_body);
+
+    subject=document.getElementById("subject").value;
+    to=document.getElementById("to").value;
+    // console.log(subject)
+    xhr=new XMLHttpRequest();
+    xhr.open("POST","/compose_send",true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    
+    data=new Object();
+    data["subject"]=subject;
+    data["send_email"]=localStorage.getItem("email");
+    data["recv_email"]=to;
+    data["body"]=editor_body;
+    xhr.send(JSON.stringify(data));
+    xhr.onload=function()
+    {
+        if(this.status==200)
+        {
+            alert("mail send");
+        }
+        else
+        {
+            alert("failed to send mail");
+        }
+    }
+    //de-serializing data
+    // parser=new DOMParser();
+    // body=parser.parseFromString(body,'text/xml');
+    // console.log(document.getElementById("editor-text").appendChild(body.documentElement));
+
+
+}
+loader=new obj();
 </script>
 <body onload="loader.getData()">
-<!-- 	<table id="mailMatrix">
-	</table>
-	<ifram id="hframe" name="hframe" style="display:hidden;width:0px;height: 0px"></ifram>
-	<div>
-		<form  target="hframe" id="compose_form">
-			<input name="send_email" type="hidden">
-			<input type="email" name="recv_email" id="recv_email" placeholder="To" onblur="loader.check_email(this)"><br/>
-			<input type="text" name="subject" id="subject" placeholder="Subject"><br/>
-			<textarea width="100px" height="100px" name="body" id="body"></textarea><br/>
-			<input type="button" value="SEND" onclick="loader.send_email()">
-		</form>
-	</div> -->
-
-
-
-
 <div id="editor-container">
     <div id="editor-menu">
         <button id="bold-button" title="Bold">Bold</button>
@@ -160,6 +201,10 @@
         <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
             <input  type="file" name="file" autocomplete="off" required>
         </form>
+        <br/>
+        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required>
+        <br/>
+        <input type="text" id="subject" name="subject" placeholder="Subject">
     </div>
     <div id="editor-text" contenteditable="true" spellcheck="false"></div>
 </div>
@@ -205,6 +250,7 @@ document.querySelector('#image-button').addEventListener('click',function()
                 img_element.src=file_path;
                 img_element.style.width="100px";
                 img_element.style.height="100px";
+
                 a.appendChild(img_element);
                 
             }
@@ -227,6 +273,7 @@ document.querySelector('#image-button').addEventListener('click',function()
     // Add any event handlers here...
     xhr.open('POST', form.getAttribute('action'), true);
     xhr.send(formData);
+    form.reset();
     //return false; // To avoid actual submission of the form
 
  });
@@ -321,19 +368,7 @@ function FindCurrentTags() {
     else
         document.querySelector("#list-button").classList.remove("highight-menu");
 }
-function convert_range(i)
-{   //serializing data
-    x=new XMLSerializer();
-    var data=document.getElementById("editor-text");
-    body=x.serializeToString(data);
-    console.log(body);
-    
-    //de-serializing data
-    parser=new DOMParser();
-    body=parser.parseFromString(body,'text/xml');
-    console.log(document.getElementById("editor-text").appendChild(body.documentElement));
 
-}
 </script>
 
 
@@ -349,7 +384,10 @@ body=parser.parseFromString(body,'text/xml');
 document.getElementById("editor-text").appendChild(body.documentElement);
  
  -->
-    <button onclick="convert_range(this)">JSONIGY</button>
+    <button onclick="send_email(this)">SEND</button>
+    <br/>
+    <div id="rmail_disp">
+    </div>
 
 
 </body>

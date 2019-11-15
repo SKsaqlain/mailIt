@@ -41,7 +41,7 @@ def redirect_login():
 def redirect_create_account():
 	return render_template("create_account.html")
 
-@app.route("/home.html")
+@app.route("/home")
 def redirect_home():
 	return  render_template("home.html")
 
@@ -101,22 +101,14 @@ def signup():
 def getData(email):
 	print(email)
 	#query to extract all the emails received
-	sql="select send_email,subject,body,date,spam,star from email where recv_email='%s'"%(str(email))
+	sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' order by date desc"%(str(email))
 	cursor.execute(sql)
 	rows=cursor.fetchall()
 	resp=jsonify()
 	message=[]
 	if(len(rows)>0):
-		for row in  rows:
-			print(type(row),row)
-			l=dict();
-			l['send_email']=row['send_email']
-			l['subject']=row['subject']
-			l['body']=row['body']
-			l['date']=row['date']
-			l['spam']=row['spam']
-			l['star']=row['star']
-			message.append(l)
+		# print(type(rows))
+		message=rows
 		resp.status_code=200
 	else:
 		resp.status_code=400
@@ -131,12 +123,15 @@ def getData(email):
 @app.route("/compose_send",methods=["POST"])
 def compose_send():
 	req_data=request.get_json()
-	print(req_data)
-	#genereating id 
+	#print(req_data)
+	# genereating id 
 	id_=0
 	sql="select max(id) from email"
-	if(cursor.execute(sql)>0):
-		id_=int(cursor.fetchone()['max(id)'])+1
+	try:
+		if(cursor.execute(sql)>0):
+			id_=int(cursor.fetchone()['max(id)'])+1
+	except:
+		pass
 	sql="insert into email(id,send_email,recv_email,subject,body) values(%d,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
 	if(cursor.execute(sql)>0):
 		print("email sent")
@@ -209,7 +204,7 @@ def upload_file():
 			return resp
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
-			file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+			file_path=app.config['UPLOAD_FOLDER']+"/"+filename
 			print(file_path)
 			file.save(file_path)
 			print('File successfully uploaded')
