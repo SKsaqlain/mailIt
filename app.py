@@ -23,11 +23,27 @@ import threading
 
 app=Flask(__name__)
 CORS(app)
+#session key has to  be set other wise files wont be uploaded.
+app.secret_key = "secret key"
+app.config['UPLOAD_FOLDER'] ='./static'
 
-db=pymysql.connect('192.168.0.105','root','123','mailIt',cursorclass=pymysql.cursors.DictCursor)
+db=pymysql.connect('127.0.0.1','root','',"mailIt",cursorclass=pymysql.cursors.DictCursor)
 cursor=db.cursor()
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+
+@app.route("/")
+def redirect_login():
+	return render_template("login.html")
+
+@app.route("/create_account")
+def redirect_create_account():
+	return render_template("create_account.html")
+
+@app.route("/home.html")
+def redirect_home():
+	return  render_template("home.html")
 
 #200-success #400-login failed.
 @app.route("/login",methods=['POST'])
@@ -45,6 +61,39 @@ def login():
 		resp=jsonify(["login-failed"])
 		resp.status_code=400
 		return resp
+
+@app.route("/signup",methods=['POST','GET'])
+def signup():
+	if(request.method=="POST"):
+		username=request.form['username']
+		password=request.form["password"]
+		email=request.form["email"]
+		print(username,password,email)
+		sql="insert into user values('%s','%s','%s')"%(email,username,password)
+		if(cursor.execute(sql)>0):
+			print("sign-up successful")
+		db.commit()
+		return render_template("home.html")
+		# message={}
+		# resp=jsonify(message)
+		# resp.status_code=200
+		# return resp
+	elif(request.method=="GET"):
+		#checking if the email already exists or not.
+		email=request.args["email"]
+		sql="select * from user where email='%s'"%(email)
+		resp=""
+		if(cursor.execute(sql)>0):
+			resp=jsonify({})
+			resp.status_code=400
+		else:
+			resp=jsonify({})
+			resp.status_code=200
+		return resp
+
+	else:
+		pass
+
 
 #function to get all the emails received by a user.
 #200-success|400-failure
@@ -76,31 +125,7 @@ def getData(email):
 	
 	return resp
 
-@app.route("/signup",methods=['POST','GET'])
-def signup():
-	if(request.method=="POST"):
-		username=request.form['username']
-		password=request.form["password"]
-		email=request.form["email"]
-		print(username,password,email)
-		message={}
-		resp=jsonify(message)
-		resp.status_code=200
-		return resp
-	elif(request.method=="GET"):
-		email=request.args["email"]
-		sql="select * from user where email='%s'"%(email)
-		resp=""
-		if(cursor.execute(sql)>0):
-			resp=jsonify({})
-			resp.status_code=400
-		else:
-			resp=jsonify({})
-			resp.status_code=200
-		return resp
 
-	else:
-		pass
 
 #send email
 @app.route("/compose_send",methods=["POST"])
@@ -164,38 +189,38 @@ def spam_check():
 
 
 def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-	
-@app.route('/editor')
-def upload_form():
-	# return render_template('upload.html')
-	return render_template("online-editor.html")
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS	
 
 @app.route('/editor', methods=['POST'])
 def upload_file():
 	# print("here")
+	message={}
+	resp=jsonify(message)
 	if request.method == 'POST':
         # check if the post request has the file part
 		if 'file' not in request.files:
-			flash('No file part')
-			return redirect(request.url)
+			print('No file part')
+			resp.status_code=400
+			return resp
 		file = request.files['file']
 		if file.filename == '':
-			flash('No file selected for uploading')
-			return redirect(request.url)
+			print('No file selected for uploading')
+			resp.status_code=400
+			return resp
 		if file and allowed_file(file.filename):
 			filename = secure_filename(file.filename)
 			file_path=os.path.join(app.config['UPLOAD_FOLDER'], filename)
 			print(file_path)
 			file.save(file_path)
-			flash('File successfully uploaded')
+			print('File successfully uploaded')
 			message=[file_path]
 			resp=jsonify(message)
 			resp.status_code=200
 			return resp
 		else:
-			flash('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
-			return redirect(request.url)
+			print('Allowed file types are txt, pdf, png, jpg, jpeg, gif')
+			resp.status_code=400
+			return resp
 # t=threading.Thread(target=spam_check)
 # t.start()
 app.run(debug=True,host="0.0.0.0",port=1000)
