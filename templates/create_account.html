@@ -1,0 +1,60 @@
+<?php
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>createAccount</title>
+</head>
+<script type="text/javascript">
+	// var addr="<?php echo $_SERVER['SERVER_ADDR'];?>";
+	// console.log(addr);
+	function check_email(){
+
+		var email=document.getElementById("email").value.toLowerCase();
+		splitted_email=email.split("@");
+		if(splitted_email[1]!="mailit.com")
+		{	//css
+			alert("wrong domain");
+		}
+		else
+		{
+			var xhr=new XMLHttpRequest();
+			var url="/signup?email="+email;
+			
+			xhr.open('GET',url,true);
+			//storing the state information of the user.
+			localStorage.setItem("email",document.getElementById("email").value);
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4){
+					if(xhr.status == 200) {
+						console.log("unique-email")
+						localStorage.setItem("email",email);
+			    	}
+			    	else if(xhr.status==400)
+			    	{	//css
+			    		alert("email already exists");
+			    	}
+			    	else
+			    	{	//css
+			    		console.log("some error");
+			    	}
+				}
+			}
+			xhr.send();
+		}
+	}
+
+		//console.log("sent");
+	
+</script>
+<body>
+	<form method="post" id="form" action="/signup">
+		<label>Username</label><input type="name" name="username" id="username" required><br/>
+		<label>Email</label><input type="email" name="email" id="email" onblur="check_email()" required><br/>
+		<label>Password</label><input type="password" name="password" id="password" required><br/>
+		<input type="submit" value="submit"><br/>
+		
+	</form>
+</body>
+</html> 
