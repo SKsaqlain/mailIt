@@ -4,136 +4,169 @@
 			DISPLAY MAIL
 		</title>
 	</head>
-<script type="text/javascript">
-	mid=localStorage.getItem("mid");
-	send_email=null;
-	recv_email=null;
-	function createTR(){var tr=document.createElement("tr");return tr;}
-	function createTD(data)
-	{
-		var td=document.createElement("td");
-		if(data!=null)
-			td.innerHTML=data;
-		return td;
-	}
-</script>
-	<body>
-		<table id="main_thread" border="1">
+	<body onload="load_main_thread()">
+		<table id="main_thread" border="1" >
 		</table>
-			<script>
-				
-				// var pageURL=window.location.href.split("/");
-				// var mid=pageURL[pageURL.length-1];
-				var  xhr=new XMLHttpRequest();
-				xhr.open("GET","/display_mail/"+mid,true);
-				xhr.onload=function()
-				{
-					if(xhr.status==200)
-					{	
-						data=JSON.parse(xhr.responseText)[0];
-						//console.log(data);
-						var main_thread=document.getElementById("main_thread");	
-						
-						var tr=createTR();
-						var td=createTD("FORM");
-						tr.appendChild(td);
-						td=createTD(data["send_email"]);
-						tr.appendChild(td);
-						main_thread.appendChild(tr);
-
-						tr=createTR();
-						td=createTD("TO");
-						tr.appendChild(td);
-						td=createTD(data["recv_email"]);
-						tr.appendChild(td);	
-						main_thread.appendChild(tr);
-
-						tr=createTR();
-						td=createTD(data["date"]);
-						td.setAttribute("colspan",'2');
-						tr.appendChild(td);
-						main_thread.appendChild(tr);
-
-						tr=createTR();
-						td=createTD("Subject:");
-						tr.appendChild(td);
-						td=createTD(data["subject"]);
-						tr.appendChild(td);
-						main_thread.appendChild(tr);
-
-						tr=createTR();
-						td=createTD(null);
-						td.setAttribute("colspan",'2');
-						// document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
-						// document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
-						// document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
-						// document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
-						// document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
-
-						//sender becomes receiver and receiver becomes sender
-						send_email=data["recv_email"];
-						recv_email=data["send_email"];
-					// var mail_body=document.getElementById("mail_body");
-					parser=new DOMParser();
-					body=parser.parseFromString(data["body"],'text/xml');
-					// mail_body.appendChild(body);
-					
-					td.appendChild(body.documentElement);
-					tr.appendChild(td);
-					main_thread.appendChild(tr);
-
-					}
-					else
-					{
-						alert("error occured!!");
-					}
-				}
-				xhr.send();
-
-			</script>
-		
 
 		<div id="reply">
-
-			<form>
-			<textarea id="textarea" name="body" rows="4" cols="50"></textarea>
-			<button name="send" onclick="send_comment()">SEND</button>
-			</form>
 		</div>
-	</body>
+			
 			<script>
-			function send_comment()
-			{	alert("here");
+				mid=localStorage.getItem("mid");
+				send_email=null;
+				recv_email=null;
+				function createTR(){var tr=document.createElement("tr");return tr;}
+				function createTD(data)
+				{
+					var td=document.createElement("td");
+					if(data!=null)
+						td.innerHTML=data;
+					return td;
+				}
+				//script to display main mail
+				function load_main_thread()
+				{
+					var  xhr=new XMLHttpRequest();
+					xhr.open("GET","/display_mail/"+mid,true);
+					xhr.onload=function()
+					{
+						if(xhr.status==200)
+						{	
+							data=JSON.parse(xhr.responseText)[0];
+							//console.log(data);
+							var main_thread=document.getElementById("main_thread");	
+							
+							var tr=createTR();
+							var td=createTD("FORM");
+							tr.appendChild(td);
+							td=createTD(data["send_email"]);
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD("TO");
+							tr.appendChild(td);
+							td=createTD(data["recv_email"]);
+							tr.appendChild(td);	
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD(data["date"]);
+							td.setAttribute("colspan",'2');
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD("Subject:");
+							tr.appendChild(td);
+							td=createTD(data["subject"]);
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD(null);
+							td.setAttribute("colspan",'2');
+							// document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
+							// document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
+							// document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
+							// document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
+							// document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
+
+							//sender becomes receiver and receiver becomes sender
+							send_email=data["recv_email"];
+							recv_email=data["send_email"];
+							console.log(send_email);
+							console.log(recv_email);
+						// var mail_body=document.getElementById("mail_body");
+						parser=new DOMParser();
+						body=parser.parseFromString(data["body"],'text/xml');
+						// mail_body.appendChild(body);
+						
+						td.appendChild(body.documentElement);
+						tr.appendChild(td);
+						main_thread.appendChild(tr);
+
+						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
+						generate_reply_form();
+						}
+						else
+						{
+							alert("error occured!!");
+						}
+					}
+					xhr.send();
+
+				}
+
+			//function  to upload comments
+			function generate_reply_form()
+			{	//alert("here");
 				var form=document.createElement("form");
+				form.id="reply_form";
+				// form.setAttribute("method","post");
+				// form.setAttribute("action","/reply");
+				// form.setAttribute("target","hframe");
+				
+				console.log(send_email);
+				console.log(recv_email);
+				
 				var se=document.createElement("input");
-				se.setAttribute("type","text");
+				se.setAttribute("type","hidden");
+				se.setAttribute("name","send_email");
 				se.setAttribute("value",send_email);
 				form.appendChild(se);
 
 				var re=document.createElement("input");
-				re.setAttribute("type","text");
+				re.setAttribute("type","hidden");
+				re.setAttribute("name","recv_email");
 				re.setAttribute("value",recv_email);
 				form.appendChild(re);
 
 				var mail_id=document.createElement("input");
-				mail_id.setAttribute("type","text");
+				mail_id.setAttribute("type","hidden");
+				mail_id.setAttribute("name","mid");
 				mail_id.setAttribute("value",mid);
 				form.appendChild(mail_id);
 
-				var textarea=document.getElementById("textarea");
+				var textarea=document.createElement("textarea");
+				textarea.setAttribute("name","body");
+				textarea.setAttribute("rows","4");
+				textarea.setAttribute("cols","50");
 				form.appendChild(textarea);
 
-				var formData=new FormData(form);
+				var submit=document.createElement("input");
+				submit.setAttribute("type","submit");
+				submit.setAttribute("value","reply");
+				form.appendChild(submit);
 
-				var xhr= new XMLHttpRequest();
-				xhr.open("POST","/reply",true);
-				xhr.onload=function(){
-					if(this.status==200)
-						console.log("reply send");
-					else
-						console.log("failed to send reply");
+				reply=document.getElementById("reply");
+				reply.appendChild(form);
+
+				form.onsubmit=function(e)
+				{	e.preventDefault();
+					xhr=new XMLHttpRequest()
+					// form=document.getElementById
+					formData=new FormData(form);
+					xhr.open("POST","/reply",true);
+					xhr.onload=function(){
+						if(this.status==200)
+						{
+							console.log("reply sent");
+						}
+						else
+						{
+							alert("failed to send reply");
+						}
+					}
+					xhr.send(formData);
+					return false;
+
 				}
-				xhr.send(formData);
-			}	
+
+			}
+
+			
 		</script>
+		
+	</body>
 </html>
