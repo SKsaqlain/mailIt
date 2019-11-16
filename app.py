@@ -194,11 +194,17 @@ def add__get_reply():
 		return resp
 	elif(request.method=="GET"):
 		mid=int(request.args["mid"])
-		sql="select * from reply where mid=%d"%(mid)
-		if(cursor.execute(sql)>0):
-			resp=jsonify(cursor.fetchall())
-			resp.status_code=200
-			return resp
+		reply_id=request.args["id"]
+		for i in range(10):
+			if(reply_id=="null"):
+				sql="select * from reply where mid=%d order by date"%(mid)
+			else:
+				sql="select * from reply where mid=%d and id > %d order by date"%(int(mid),int(reply_id))
+			if(cursor.execute(sql)>0):
+				resp=jsonify(cursor.fetchall())
+				resp.status_code=200
+				return resp
+			time.sleep(1)
 		resp=jsonify({})
 		resp.status_code=400
 		return  resp
