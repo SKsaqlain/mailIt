@@ -157,7 +157,8 @@ table{
 									table.onclick=function ()
 										{	var url="/redirect_display_mail";
 											localStorage.setItem("mid",this.id);
-											open(url,"","height=600,width=600,scrollbars=yes");
+											// open(url,"","height=600,width=600,scrollbars=yes");
+											window.open(url);
 											// window.location.assign(url);
 										}
 								rmail_disp.appendChild(table);
