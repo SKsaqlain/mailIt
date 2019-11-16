@@ -143,6 +143,34 @@ def getLatestData(email,date):
 	resp.status_code=400
 	return resp
 
+@app.route("/reply",methods=["POST"])
+def add_comment():
+	req_data=request.get_json()
+	#print(req_data)
+	# genereating id
+	try: 
+		id_=0
+		sql="select max(id) from reply"
+		try:
+			if(cursor.execute(sql)>0):
+				id_=int(cursor.fetchone()['max(id)'])+1
+		except:
+			pass
+		sql='''insert into reply(id,mid,send_email,recv_email,body) 
+				values(%d,%d,'%s','%s','%s')'''%(id_,req_data["mid"],req_data["send_email"],req_data["recv_email"],req_data["body"])
+		if(cursor.execute(sql)>0):
+			print("reply sent")
+		#inserting data into spam_log database  to be check for later
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=200
+		return resp
+	except:
+		resp=jsonify({})
+		resp.status_code=400
+		return resp
+	
+
 
 #send email
 @app.route("/compose_send",methods=["POST"])
