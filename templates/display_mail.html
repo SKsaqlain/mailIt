@@ -7,7 +7,8 @@
 	<body onload="load_main_thread()">
 		<table id="main_thread" border="1" >
 		</table>
-
+		<div id="reply_disp">
+		</div>
 		<div id="reply">
 		</div>
 			
@@ -15,6 +16,7 @@
 				mid=localStorage.getItem("mid");
 				send_email=null;
 				recv_email=null;
+				reply_id=null;
 				function createTR(){var tr=document.createElement("tr");return tr;}
 				function createTD(data)
 				{
@@ -87,7 +89,10 @@
 						main_thread.appendChild(tr);
 
 						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
+						
+						display_reply();
 						generate_reply_form();
+
 						}
 						else
 						{
@@ -163,6 +168,52 @@
 
 				}
 
+			}
+
+			function display_reply()
+			{	//alert("herre");
+				var div_reply=document.getElementById("reply_disp");
+				xhr=new XMLHttpRequest();
+				xhr.open("GET","/reply?mid="+mid+"&id="+reply_id,true);
+				xhr.onload=function()
+				{
+					if(this.status==200)
+					{
+						var data=JSON.parse(this.responseText);
+						for(i=0;i<data.length;i++)
+						{	
+							var table=document.createElement("table");
+							table.setAttribute("border","1");
+							table.id=data[i]["id"];
+							var tr=createTR();
+							var td=createTD(null);
+							td.innerHTML=data[i]["send_email"]+" ----> "+data[i]["recv_email"];
+							tr.appendChild(td);
+							
+							td=createTD(data[i]["date"]);
+							tr.appendChild(td);
+							//recording the latest date
+							date=data[i]["date"];
+							table.appendChild(tr);
+
+							tr=createTR();
+							td=createTD(data[i]["body"]);
+							td.setAttribute("colspan","2");
+
+							tr.appendChild(td);
+							table.appendChild(tr);
+							
+							div_reply.appendChild(table);
+							reply_id=data[i]["id"];
+						}
+						
+
+					}
+						xhr.abort();
+						display_reply(reply_id);
+					
+				}
+				xhr.send();
 			}
 
 			
