@@ -173,8 +173,8 @@ def getLatestData(email,date):
 @app.route("/reply",methods=["POST","GET"])
 def add__get_reply():
 	if(request.method=="POST"):
-		req_data=request.get_json()
-		#print(req_data)
+		
+		print(request.form)
 		# genereating id
 		id_=0
 		sql="select max(id) from reply"
@@ -184,7 +184,7 @@ def add__get_reply():
 		except:
 			pass
 		sql='''insert into reply(id,mid,send_email,recv_email,body) 
-				values(%d,%d,'%s','%s','%s')'''%(id_,req_data["mid"],req_data["send_email"],req_data["recv_email"],req_data["body"])
+				values('%s','%s','%s','%s','%s')'''%(id_,request.form["mid"],request.form["send_email"],request.form["recv_email"],request.form["body"])
 		if(cursor.execute(sql)>0):
 			print("reply sent")
 		#inserting data into spam_log database  to be check for later
