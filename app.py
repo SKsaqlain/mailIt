@@ -171,7 +171,7 @@ def getLatestData(email,date):
 
 
 @app.route("/reply",methods=["POST","GET"])
-def add_reply():
+def add__get_reply():
 	if(request.method=="POST"):
 		req_data=request.get_json()
 		#print(req_data)
