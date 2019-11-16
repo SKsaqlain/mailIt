@@ -143,12 +143,12 @@ def getLatestData(email,date):
 	resp.status_code=400
 	return resp
 
-@app.route("/reply",methods=["POST"])
-def add_comment():
-	req_data=request.get_json()
-	#print(req_data)
-	# genereating id
-	try: 
+@app.route("/reply",methods=["POST","GET"])
+def add_reply():
+	if(request.method=="POST"):
+		req_data=request.get_json()
+		#print(req_data)
+		# genereating id
 		id_=0
 		sql="select max(id) from reply"
 		try:
@@ -165,10 +165,18 @@ def add_comment():
 		resp=jsonify({})
 		resp.status_code=200
 		return resp
-	except:
+	elif(request.method=="GET"):
+		mid=int(request.args["mid"])
+		sql="select * from reply where mid=%d"%(mid)
+		if(cursor.execute(sql)>0):
+			resp=jsonify(cursor.fetchall())
+			resp.status_code=200
+			return resp
 		resp=jsonify({})
 		resp.status_code=400
-		return resp
+		return  resp
+
+
 	
 
 
