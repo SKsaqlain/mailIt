@@ -6,9 +6,20 @@
 	</head>
 <script type="text/javascript">
 	mid=localStorage.getItem("mid");
+	send_email=null;
+	recv_email=null;
+	function createTR(){var tr=document.createElement("tr");return tr;}
+	function createTD(data)
+	{
+		var td=document.createElement("td");
+		if(data!=null)
+			td.innerHTML=data;
+		return td;
+	}
 </script>
 	<body>
-		<table>
+		<table id="main_thread" border="1">
+		</table>
 			<script>
 				
 				// var pageURL=window.location.href.split("/");
@@ -19,19 +30,58 @@
 				{
 					if(xhr.status==200)
 					{	
-						var data=JSON.parse(xhr.responseText)[0];
-						console.log(data);
+						data=JSON.parse(xhr.responseText)[0];
+						//console.log(data);
+						var main_thread=document.getElementById("main_thread");	
 						
-						document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
-						document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
-						document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
-						document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
-						document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
+						var tr=createTR();
+						var td=createTD("FORM");
+						tr.appendChild(td);
+						td=createTD(data["send_email"]);
+						tr.appendChild(td);
+						main_thread.appendChild(tr);
+
+						tr=createTR();
+						td=createTD("TO");
+						tr.appendChild(td);
+						td=createTD(data["recv_email"]);
+						tr.appendChild(td);	
+						main_thread.appendChild(tr);
+
+						tr=createTR();
+						td=createTD(data["date"]);
+						td.setAttribute("colspan",'2');
+						tr.appendChild(td);
+						main_thread.appendChild(tr);
+
+						tr=createTR();
+						td=createTD("Subject:");
+						tr.appendChild(td);
+						td=createTD(data["subject"]);
+						tr.appendChild(td);
+						main_thread.appendChild(tr);
+
+						tr=createTR();
+						td=createTD(null);
+						td.setAttribute("colspan",'2');
+						// document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
+						// document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
+						// document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
+						// document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
+						// document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
+
+						//sender becomes receiver and receiver becomes sender
+						send_email=data["recv_email"];
+						recv_email=data["send_email"];
 					// var mail_body=document.getElementById("mail_body");
 					parser=new DOMParser();
 					body=parser.parseFromString(data["body"],'text/xml');
 					// mail_body.appendChild(body);
-					document.body.appendChild(body.documentElement);
+					
+					td.appendChild(body.documentElement);
+					tr.appendChild(td);
+					main_thread.appendChild(tr);
+
 					}
 					else
 					{
@@ -41,9 +91,49 @@
 				xhr.send();
 
 			</script>
-		</table>
+		
+
 		<div id="reply">
 
+			<form>
+			<textarea id="textarea" name="body" rows="4" cols="50"></textarea>
+			<button name="send" onclick="send_comment()">SEND</button>
+			</form>
 		</div>
 	</body>
+			<script>
+			function send_comment()
+			{	alert("here");
+				var form=document.createElement("form");
+				var se=document.createElement("input");
+				se.setAttribute("type","text");
+				se.setAttribute("value",send_email);
+				form.appendChild(se);
+
+				var re=document.createElement("input");
+				re.setAttribute("type","text");
+				re.setAttribute("value",recv_email);
+				form.appendChild(re);
+
+				var mail_id=document.createElement("input");
+				mail_id.setAttribute("type","text");
+				mail_id.setAttribute("value",mid);
+				form.appendChild(mail_id);
+
+				var textarea=document.getElementById("textarea");
+				form.appendChild(textarea);
+
+				var formData=new FormData(form);
+
+				var xhr= new XMLHttpRequest();
+				xhr.open("POST","/reply",true);
+				xhr.onload=function(){
+					if(this.status==200)
+						console.log("reply send");
+					else
+						console.log("failed to send reply");
+				}
+				xhr.send(formData);
+			}	
+		</script>
 </html>
