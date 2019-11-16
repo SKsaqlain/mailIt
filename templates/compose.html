@@ -39,6 +39,41 @@
 
         </style>
     </head>
+    
+    <body>
+            <div id="editor-container" style="margin-top:100px">
+                    <div id="editor-menu">
+                        <button id="bold-button" title="Bold">Bold</button>
+                        <button id="underline-button" title="Underline">Underline</button>
+                        <button id="list-button" title="Bullet List">List</button>
+                        <button id="image-button" title="Picture">Attachments</button>
+                        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
+                            <input  type="file" name="file" autocomplete="off" required>
+                        </form>
+                        <br/>
+                        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required>
+                        <br/>
+                        <input type="text" id="subject" name="subject" placeholder="Subject">
+                    </div>
+                    <div id="editor-text" contenteditable="true" spellcheck="false"></div>
+                </div>
+           
+<!-- #converting DOM to xmlSTRING    SERIALIZE
+
+x=new XMLSerializer();
+var data=document.getElementById("editor-text");
+body=x.serializeToString(data);
+
+#DESERIALIZE
+parser=new DOMParser();
+body=parser.parseFromString(body,'text/xml');
+document.getElementById("editor-text").appendChild(body.documentElement);
+ 
+ -->
+    <button onclick="send_email(this)">SEND</button>
+    <br/>
+        
+    </body>
     <script>
         function send_email(i)
 {   //serializing data
@@ -240,38 +275,4 @@ function FindCurrentTags() {
 
 
     </script>
-    <body>
-            <div id="editor-container" style="margin-top:100px">
-                    <div id="editor-menu">
-                        <button id="bold-button" title="Bold">Bold</button>
-                        <button id="underline-button" title="Underline">Underline</button>
-                        <button id="list-button" title="Bullet List">List</button>
-                        <button id="image-button" title="Picture">Attachments</button>
-                        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
-                            <input  type="file" name="file" autocomplete="off" required>
-                        </form>
-                        <br/>
-                        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required>
-                        <br/>
-                        <input type="text" id="subject" name="subject" placeholder="Subject">
-                    </div>
-                    <div id="editor-text" contenteditable="true" spellcheck="false"></div>
-                </div>
-           
-<!-- #converting DOM to xmlSTRING    SERIALIZE
-
-x=new XMLSerializer();
-var data=document.getElementById("editor-text");
-body=x.serializeToString(data);
-
-#DESERIALIZE
-parser=new DOMParser();
-body=parser.parseFromString(body,'text/xml');
-document.getElementById("editor-text").appendChild(body.documentElement);
- 
- -->
-    <button onclick="send_email(this)">SEND</button>
-    <br/>
-        
-    </body>
 </html>
