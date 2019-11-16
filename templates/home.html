@@ -89,6 +89,7 @@ table{
 								var mail=data[i];
 								var table=document.createElement("table");
 								table.id=mail["id"];
+								
                                 table.style.width="100%";
                                 table.style.textAlign="center";
                                 table.style.padding="5px";
@@ -152,7 +153,13 @@ table{
 											//changing the id so the editor functions are not applied here
 											td.childNodes[0].id="mail_body";
 										tr.appendChild(td);
-									table.appendChild(tr)
+									table.appendChild(tr);
+									table.onclick=function ()
+										{	var url="/redirect_display_mail";
+											localStorage.setItem("mid",this.id);
+											open(url,"","height=600,width=600,scrollbars=yes");
+											// window.location.assign(url);
+										}
 								rmail_disp.appendChild(table);
 							}
 						}
@@ -238,6 +245,9 @@ function send_email(i)
 
 
 }
+// function display_mail(mid){
+// 	open("/display_mail/"+mid,"","height=600,width=600,scrollbars=yes")
+// }
 function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
