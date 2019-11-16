@@ -120,6 +120,31 @@ def getData(email):
 	
 	return resp
 
+
+@app.route("/redirect_display_mail")
+def rediret_display_mail():
+	return render_template("display_mail.html")
+#get a specific mail used to display mail in a new window.
+@app.route("/display_mail/<mid>",methods=["GET"])
+def display_mail(mid):
+	print(mid)
+	#query to extract all the emails received
+	sql="select id,send_email,recv_email,subject,body,date,spam,star from email where id='%s'"%(mid)
+	cursor.execute(sql)
+	rows=cursor.fetchall()
+	
+	if(len(rows)>0):
+		resp=jsonify(rows)
+		resp.status_code=200
+		
+	else:
+		resp=jsonify()
+		resp.status_code=400
+	
+	return resp
+	
+
+
 #use longpooling to get the latest mails.
 @app.route("/getData/<email>/<date>/latest",methods=['GET'])
 def getLatestData(email,date):
@@ -142,6 +167,8 @@ def getLatestData(email,date):
 	resp=jsonify(message)
 	resp.status_code=400
 	return resp
+
+
 
 @app.route("/reply",methods=["POST","GET"])
 def add_reply():
