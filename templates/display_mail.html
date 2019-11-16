@@ -1,0 +1,49 @@
+<html>
+<head>
+		<title>
+			DISPLAY MAIL
+		</title>
+	</head>
+<script type="text/javascript">
+	mid=localStorage.getItem("mid");
+</script>
+	<body>
+		<table>
+			<script>
+				
+				// var pageURL=window.location.href.split("/");
+				// var mid=pageURL[pageURL.length-1];
+				var  xhr=new XMLHttpRequest();
+				xhr.open("GET","/display_mail/"+mid,true);
+				xhr.onload=function()
+				{
+					if(xhr.status==200)
+					{	
+						var data=JSON.parse(xhr.responseText)[0];
+						console.log(data);
+						
+						document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
+						document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
+						document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
+						document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
+						document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
+					// var mail_body=document.getElementById("mail_body");
+					parser=new DOMParser();
+					body=parser.parseFromString(data["body"],'text/xml');
+					// mail_body.appendChild(body);
+					document.body.appendChild(body.documentElement);
+					}
+					else
+					{
+						alert("error occured!!");
+					}
+				}
+				xhr.send();
+
+			</script>
+		</table>
+		<div id="reply">
+
+		</div>
+	</body>
+</html>
