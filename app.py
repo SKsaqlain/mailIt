@@ -131,8 +131,10 @@ def display_mail(mid):
 	print(mid)
 	#query to extract all the emails received
 	sql="select id,send_email,recv_email,subject,body,date,spam,star,send_eread,recv_eread from email where id='%s'"%(mid)
-	cursor.execute(sql)
-	rows=cursor.fetchall()
+	if(cursor.execute(sql)):
+		rows=cursor.fetchall()
+	else:
+		rows=[]
 	
 	if(len(rows)>0):
 		resp=jsonify(rows)
@@ -193,6 +195,7 @@ def add__get_reply():
 		sql="select send_email,recv_email from email where id=%s"%(request.form["mid"])
 		if(cursor.execute(sql)>0):
 			data=cursor.fetchall()[0]
+			mid=request.form["mid"]
 			if(data["send_email"]==request.form["recv_email"]):
 				sql="update email set send_eread=0 where id=%s"%(mid)
 			else:
@@ -205,24 +208,27 @@ def add__get_reply():
 		return resp
 	elif(request.method=="GET"):
 		
-		mid=int(request.args["mid"])
+		mid=request.args["mid"]
 		reply_id=request.args["id"]
-		for i in range(10):
+		for i in range(3):
 			if(reply_id=="null"):
-				sql="select * from reply where mid=%d order by date"%(mid)
+				sql="select * from reply where mid=%s order by date"%(mid)
 			else:
-				sql="select * from reply where mid=%d and id > %d order by date"%(int(mid),int(reply_id))
+				sql="select * from reply where mid=%s and id > %s order by date"%(mid,reply_id)
 			if(cursor.execute(sql)>0):
 				resp=jsonify(cursor.fetchall())
 				#set the read column of the  email table
 				sql="update email set send_eread=1 and recv_eread=1 where id=%s"%(mid)
-				if(cursor.execute(sql)):
+				if(cursor.execute(sql)>0):
 					print("read column modified")
 					db.commit()
+				else:
+					print("unable to modify read column")
 				resp.status_code=200
 				
 				return resp
-			time.sleep(1)
+			else:
+				time.sleep(1)
 
 		resp=jsonify({})
 		resp.status_code=400
@@ -315,30 +321,36 @@ def email_read(mid,email):
 			else:
 				message=[data["send_eread"]]
 				#check whether the receiver has read the email or not
-				resp=jsonify(message)
-				resp.status_code=200
-				return resp
-		resp=jsonify()
-		resp.status_code=400
-		return resp
+			resp=jsonify(message)
+			resp.status_code=200
+			return resp
+		else:
+			resp=jsonify()
+			resp.status_code=400
+			return resp
 	elif(request.method=="POST"):
 		#the receivers email/ whoever is viewing the mail has to be methioned in the route 
 		sql="select send_email,recv_email from email where id=%s"%(mid);
 		if(cursor.execute(sql)>0):
-			data=cursor.fetchall()
+			data=cursor.fetchall()[0]
 			if(email==data["recv_email"]):
 				sql="update email set recv_eread=1 where id=%s"%(mid);
 			else:
 				sql="update email set send_eread=1 where id=%s"%(mid);
-				if(cursor.execute(sql)>0):
-					db.commit()
-					resp=jsonify()
-					resp.status_code=200
-					return resp
-				else:
-					resp=jsonify()
-					resp.status_code=400
-					return resp
+			if(cursor.execute(sql)>0):
+				db.commit()
+				resp=jsonify()
+				resp.status_code=200
+				return resp
+			else:
+				resp=jsonify()
+				resp.status_code=400
+				return resp
+		else:
+			resp=jsonify()
+			resp.status_code=400
+			return resp
+
 	else:
 		pass
 
