@@ -6,46 +6,42 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style type="text/css">
 
-#editor-container {
-    border: 1px solid #cccccc;
-    display: inline-block;
+body{
+	background-image: url("/static/img/mail.png");
+	background-size: cover;
+}
+.rmail-div{
+	background-color:rgb(24, 211, 218);
+	
+	width:90%;
+	height:80%;
+	border-radius: 25px;
+	padding: 25px;
+	margin-left: 5%;
+	margin-top:02%;
+	/* opacity: 0.8; */
 }
 
-#editor-menu {
-    padding: 10px;
+button{
+	background-color: rgb(61, 170, 61);
+	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	color:white;
+	padding:10px;
+	margin: 20px auto;
+	display: block;
+	cursor: pointer;
+	
+	
 }
 
-#editor-menu button {
-    font-size: 12px;
-    font-family: inherit;
-    border: 1px solid #777777;
-    background-color: white;
-    padding: 5px;
-    margin: 0 10px 0 0;
-}
+
 
 .highight-menu {
     background-color: #777777 !important;
     color: white !important;
-}
-
-#editor-text {
-    width: 500px;
-    height: 300px;
-    border-top: 1px solid #cccccc;
-    outline: none;
-    padding: 5px;
-    overflow: auto;
-}
-
-#editor-text img {
-    max-width: 250px;
-}
-
-td{
-    border:0px;
-    background-color:rgb(192, 230, 231);
-    font-family: "arial";
 }
 
 .checked{
@@ -55,12 +51,14 @@ td{
     color:white;
 }
 table{
-    /* width:"100%"; */
-    border:"5px solid darkblue";
-    
-    
-    background-color:aquamarine;
+    border-bottom:2px solid grey;
+	display: block;
+	margin:0 auto;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	font-weight: 400;
+	text-align: center;
 }
+.rmail-div:hover{background-color: rgb(0, 255, 242);}
 </style>
 
 </head>
@@ -90,25 +88,27 @@ table{
 							for(var i=0;i<data.length;i++)
 							{
 								var mail=data[i];
+								var division=document.createElement("div");
 								var table=document.createElement("table");
+								// division.appendChild(table);
+								division.classList="rmail-div";
 								table.id=mail["id"];
 								
-                                table.style.width="100%";
-                                table.style.textAlign="center";
-                                table.style.padding="5px";
                                 
 									tr=document.createElement("tr");
 									
 										td=document.createElement("td");
-                                        td.class="table-data";
+                                        td.width="100px";
 										td.innerHTML=mail["send_email"]+"->"+mail["recv_email"];
 										tr.appendChild(td);
 
 										td=document.createElement("td");
+										td.width="100px";
 										td.innerHTML=mail["subject"];
 										tr.appendChild(td);
 
 										td=document.createElement("td");
+										td.width="100px";
 										if(mail["spam"]){
                                             td.innerHTML="Spam";
                                             td.style.font="red";
@@ -119,6 +119,7 @@ table{
 										tr.appendChild(td);
 
                                         td=document.createElement("td");
+										td.width="100px";
 										if(mail["star"]){
                                             td.innerHTML="Starred";
                                             td.style.font="golden";
@@ -128,6 +129,7 @@ table{
                                             // td.style.font=;
                                         }
 										tr.appendChild(td);
+										td.width="100px";
 										td=document.createElement("td");
 										td.innerHTML=mail["date"];
 										if(flag==0)
@@ -188,7 +190,8 @@ table{
 									xhr.send();
 									this.parentNode.removeChild(this);
 								}
-								rmail_disp.appendChild(table);
+								division.appendChild(table);
+								rmail_disp.appendChild(division);
 								rmail_disp.appendChild(button);
 								
 							}
@@ -227,23 +230,22 @@ function getlatestdata()
 					var mail=data[i];
 					var table=document.createElement("table");
 					table.id=mail["id"];
-					
-                    table.style.width="100%";
-                    table.style.textAlign="center";
-                    table.style.padding="5px";
+				
                     
 						tr=document.createElement("tr");
 						
 							td=document.createElement("td");
-                            td.class="table-data";
+                            td.width="100px";
 							td.innerHTML=mail["send_email"]+"->"+mail["recv_email"];
 							tr.appendChild(td);
 
 							td=document.createElement("td");
+							td.width="100px";
 							td.innerHTML=mail["subject"];
 							tr.appendChild(td);
 
 							td=document.createElement("td");
+							td.width="100px";
 							if(mail["spam"]){
                                 td.innerHTML="Spam";
                                 td.style.font="red";
@@ -254,6 +256,7 @@ function getlatestdata()
 							tr.appendChild(td);
 
                             td=document.createElement("td");
+							td.width="100px";
 							if(mail["star"]){
                                 td.innerHTML="Starred";
                                 td.style.font="golden";
@@ -263,7 +266,9 @@ function getlatestdata()
                                 // td.style.font=;
                             }
 							tr.appendChild(td);
+
 							td=document.createElement("td");
+							td.width="100px";
 							td.innerHTML=mail["date"];
 							if(flag==0)
 							{
@@ -346,12 +351,13 @@ function compose(){
 
 </script>
 <body onload="getData()">
-    <div id="rmail_disp">
+	<div>
+        <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
+    </div>
+    <div id="rmail_disp" class="rmail">
     </div>
 
-    <div>
-        <button onclick="compose(this)">Compose Mail</button>
-    </div>
+    
 
 
 </body>
