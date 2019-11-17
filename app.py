@@ -104,7 +104,7 @@ def signup():
 def getData(email):
 	print(email)
 	#query to extract all the emails received
-	sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' order by date desc"%(str(email))
+	sql="select id,send_email,recv_email,subject,body,date,spam,star from email where recv_email='%s' or send_email='%s' order by date desc"%(str(email),str(email))
 	cursor.execute(sql)
 	rows=cursor.fetchall()
 	resp=jsonify()
@@ -154,7 +154,7 @@ def getLatestData(email,date):
 	for i in range(5):
 		# date=request.args["date"]
 		#query to extract all the emails received
-		sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' and date>'%s' order by date desc"%(str(email),date)
+		sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' or send_email='%s' and date>'%s' order by date desc"%(str(email),str(email),date)
 		cursor.execute(sql)
 		rows=cursor.fetchall()
 		resp=jsonify()
