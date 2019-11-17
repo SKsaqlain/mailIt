@@ -149,27 +149,43 @@ def display_mail(mid):
 
 
 #use longpooling to get the latest mails.
-@app.route("/getData/<email>/<date>/latest",methods=['GET'])
-def getLatestData(email,date):
-	for i in range(5):
-		# date=request.args["date"]
-		#query to extract all the emails received
-		sql="select id,send_email,subject,body,date,spam,star from email where recv_email='%s' or send_email='%s' and date>'%s' order by date desc"%(str(email),str(email),date)
-		cursor.execute(sql)
-		rows=cursor.fetchall()
-		resp=jsonify()
-		message=[]
-		if(len(rows)>0):
-			# print(type(rows))
+@app.route("/getData/<email>/latest",methods=['GET'])
+def getLatestData(email):
+	#latest mail id
+	#problem with dealing with mysql datatiem amd python datetime
+	lmid=request.args["lmid"]
+	sql="select date from email where id=%s"%(lmid)
+	if(cursor.execute(sql)>0):
+		date=cursor.fetchall()[0]["date"]
+
+		for i in range(5):
+			# date=request.args["date"]
+			#query to extract all the emails received
+			sql="select id,send_email,recv_email,send_eread,recv_eread,subject,body,date,spam,star from email where (recv_email='%s' or send_email='%s') and (send_eread=0 or recv_eread=0) and date>'%s' order by date desc"%(str(email),str(email),date)
+
+			cursor.execute(sql)
+			rows=cursor.fetchall()
 			message=rows
-			resp.status_code=200
-			return resp
-		else:
-			#checck for latest mails after 1 seconds
-			time.sleep(1)
-	resp=jsonify(message)
-	resp.status_code=400
-	return resp
+			# message=[]
+			# for ele in  rows:
+			# 	# if(ele["date"]>date):
+			# 	message.append(ele)	
+			
+			if(len(message)>0):
+				print(message)
+				resp=jsonify(message)
+				resp.status_code=200
+				return resp
+			else:
+				#checck for latest mails after 1 seconds
+				time.sleep(1)
+		resp=jsonify({})
+		resp.status_code=400
+		return resp
+	else:
+		resp=jsonify({})
+		resp.status_code=400
+		return resp
 
 
 
@@ -258,11 +274,12 @@ def compose_send():
 	sql="insert into email(id,send_email,recv_email,subject,body) values(%d,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
 	if(cursor.execute(sql)>0):
 		print("email sent")
+		db.commit()
 	#inserting data into spam_log database  to be check for later
 	sql="insert into spam_check_log values('%d')"%(id_)
 	if(cursor.execute(sql)>0):
 		print("emailed logged for further check")
-	db.commit()
+		db.commit()
 	resp=jsonify({})
 	resp.status_code=200
 	return resp
