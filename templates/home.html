@@ -188,6 +188,83 @@ function getlatestdata()
 			lmid=data[0]["id"];
 			console.log(lmid)
 			alert(data.length+" new mails received");
+			var rmail_disp=document.getElementById("rmail_disp");
+			if(data.length>0)
+			{
+				for(var i=data.length-1;i>=0;i--)
+				{
+					var mail=data[i];
+					var table=document.createElement("table");
+					table.id=mail["id"];
+					
+                    table.style.width="100%";
+                    table.style.textAlign="center";
+                    table.style.padding="5px";
+                    
+						tr=document.createElement("tr");
+						
+							td=document.createElement("td");
+                            td.class="table-data";
+							td.innerHTML=mail["send_email"]+"->"+mail["recv_email"];
+							tr.appendChild(td);
+
+							td=document.createElement("td");
+							td.innerHTML=mail["subject"];
+							tr.appendChild(td);
+
+							td=document.createElement("td");
+							if(mail["spam"]){
+                                td.innerHTML="Spam";
+                                td.style.font="red";
+                            }
+                            else{
+                                td.innerHTML="Not Spam";
+                            }
+							tr.appendChild(td);
+
+                            td=document.createElement("td");
+							if(mail["star"]){
+                                td.innerHTML="Starred";
+                                td.style.font="golden";
+                            }
+                            else{
+                                td.innerHTML="Star?";
+                                // td.style.font=;
+                            }
+							tr.appendChild(td);
+							td=document.createElement("td");
+							td.innerHTML=mail["date"];
+							if(flag==0)
+							{
+								lmid=mail["id"];
+								flag=1;
+							}
+							tr.appendChild(td);
+						table.appendChild(tr);
+
+						tr=document.createElement("tr");
+						tr.colspan=5
+							td=document.createElement("td");
+							console.log(mail["body"]);
+							parser=new DOMParser();
+							body=parser.parseFromString(mail["body"],'text/xml');
+								td.appendChild(body.documentElement);
+								//changing the id so the editor functions are not applied here
+								td.childNodes[0].id="mail_body";
+							tr.appendChild(td);
+						table.appendChild(tr);
+						table.onclick=function ()
+							{	var url="/redirect_display_mail";
+								localStorage.setItem("mid",this.id);
+								// open(url,"","height=600,width=600,scrollbars=yes");
+								window.open(url);
+								// window.location.assign(url);
+							}
+					rmail_disp.insertBefore(table,rmail_disp.childNodes[0]);
+				}
+			}
+					
+
 		}
 		xhr.abort();
 			clearTimeout(time);
