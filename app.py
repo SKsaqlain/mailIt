@@ -187,8 +187,18 @@ def add__get_reply():
 				values('%s','%s','%s','%s','%s')'''%(id_,request.form["mid"],request.form["send_email"],request.form["recv_email"],request.form["body"])
 		if(cursor.execute(sql)>0):
 			print("reply sent")
-		#inserting data into spam_log database  to be check for later
 		db.commit()
+		#updating the main thread email_read column
+		sql="select send_email,recv_email from email where id=%s"%(request.form["mid"])
+		if(cursor.execute(sql)>0):
+			data=cursor.fetchall()
+			if(data["send_email"]==request.form["recv_email"]):
+				sql="update email set send_eread=0 where id=%s"%(mid)
+			else:
+				sql="update email set recv_eread=0 where id=%s"%(mid)
+			if(cursor.execute(sql)>0):
+				print("made changes to read column in email table")
+				db.commit()
 		resp=jsonify({})
 		resp.status_code=200
 		return resp
@@ -203,6 +213,11 @@ def add__get_reply():
 				sql="select * from reply where mid=%d and id > %d order by date"%(int(mid),int(reply_id))
 			if(cursor.execute(sql)>0):
 				resp=jsonify(cursor.fetchall())
+				#set the read column of the  email table
+				sql="update email set send_eread=1 and recv_eread=1 where id=%s"%(mid)
+				if(cursor.execute(sql)):
+					print("read column modified")
+					db.commit()
 				resp.status_code=200
 				
 				return resp
@@ -284,6 +299,47 @@ def star(mid):
 	else:
 		resp.status_code=400
 		return resp
+
+
+#checkc whether a mmail is read or not
+@app.route("/email_read/<mid>/<email>",methods=["GET","POST"])
+def email_read(mid,email):
+	if(request.method=="GET"):
+		#chekc who has sent the mail to whome
+		sql="select send_email,recv_email,send_eread,recv_eread from email where id=%s"%(mid);
+		if(cursor.execute(sql)>0):
+			data=cursor.fetchall()
+			if(email==data["recv_email"]):
+				message=[data["recv_eread"]]
+			else:
+				message=[data["send_eread"]]
+				#check whether the receiver has read the email or not
+				resp=jsonify(message)
+				resp.status_code=200
+				return resp
+		resp=jsonify()
+		resp.status_code=400
+		return resp
+	elif(request.method=="POST"):
+		#the receivers email/ whoever is viewing the mail has to be methioned in the route 
+		sql="select send_email,recv_email from email where id=%s"%(mid);
+		if(cursor.execute(sql)>0):
+			data=cursor.fetchall()
+			if(email==data["recv_email"]):
+				sql="update email set recv_eread=1 where id=%s"%(mid);
+			else:
+				sql="update email set send_eread=1 where id=%s"%(mid);
+				if(cursor.execute(sql)>0):
+					db.commit()
+					resp=jsonify()
+					resp.status_code=200
+					return resp
+				else:
+					resp=jsonify()
+					resp.status_code=400
+					return resp
+	else:
+		pass
 
 
 def allowed_file(filename):
