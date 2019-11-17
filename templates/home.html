@@ -71,14 +71,11 @@ table{
 	//variable used to record the lateset time
 	flag=0
 	email=localStorage.getItem("email");
-	function obj()
-	{
-		xhr=new XMLHttpRequest();
-		//function to display email data
-		this.getData=function()
+	//function to display email data
+	function getData()
 		{	//user state information is stored in localStorage
 			
-			
+			var xhr=new XMLHttpRequest();
 			xhr.open('GET','/getData/'+email,true);
 			xhr.onreadystatechange=function()
 			{
@@ -159,7 +156,41 @@ table{
 											window.open(url);
 											// window.location.assign(url);
 										}
+								
+								button=document.createElement("button");
+								button.innerHTML="delete";
+								button.id=mail["id"];
+								button.onclick=function()
+								{
+									var url="/delete_mail/"+this.id;
+									var id=this.id;
+									var xhr=new XMLHttpRequest();
+									xhr.open("DELETE",url,true);
+									xhr.onload=function()
+									{	if(this.status==200)
+										{
+											console.log("deleted mail");
+											var tables=document.getElementsByTagName("table");
+											for(i=0;i<tables.length;i++)
+											{
+												if(table.id==id)
+													table.parentNode.removeChild(table);
+											}
+											this.abort();
+											// getData();
+										}
+										else
+										{
+											console.log("failed to delete mail");
+										}
+
+									}
+									xhr.send();
+									this.parentNode.removeChild(this);
+								}
 								rmail_disp.appendChild(table);
+								rmail_disp.appendChild(button);
+								
 							}
 						}
 					}
@@ -175,7 +206,7 @@ table{
 			}
 			xhr.send();
 		}
-	}
+	
 function getlatestdata()
 {
 	var xhr=new XMLHttpRequest();
@@ -260,6 +291,41 @@ function getlatestdata()
 								window.open(url);
 								// window.location.assign(url);
 							}
+					
+					button=document.createElement("button");
+					button.innerHTML="delete";
+					button.id=mail["id"];
+					button.onclick=function()
+					{
+						var url="/delete_mail/"+this.id;
+						var id=this.id;
+						this.parentNode.removeChild(this);
+						var xhr=new XMLHttpRequest();
+						xhr.open("DELETE",url,true);
+						xhr.onload=function()
+						{	if(this.status==200)
+							{
+								console.log("deleted mail");
+								var tables=document.getElementsByTagName("table");
+											for(i=0;i<tables.length;i++)
+											{
+												if(table.id==id)
+													table.parentNode.removeChild(table);
+											}
+											
+								this.abort();
+								//getData();
+							}
+							else
+							{
+								console.log("failed to delete mail");
+							}
+
+						}
+						xhr.send();
+						this.parentNode.removeChild(this);
+					}
+					rmail_disp.insertBefore(button,rmail_disp.childNodes[0]);
 					rmail_disp.insertBefore(table,rmail_disp.childNodes[0]);
 				}
 			}
@@ -278,10 +344,8 @@ function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
 
-
-loader=new obj();
 </script>
-<body onload="loader.getData()">
+<body onload="getData()">
     <div id="rmail_disp">
     </div>
 
