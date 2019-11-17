@@ -124,12 +124,13 @@ def getData(email):
 @app.route("/redirect_display_mail")
 def rediret_display_mail():
 	return render_template("display_mail.html")
+
 #get a specific mail used to display mail in a new window.
 @app.route("/display_mail/<mid>",methods=["GET"])
 def display_mail(mid):
 	print(mid)
 	#query to extract all the emails received
-	sql="select id,send_email,recv_email,subject,body,date,spam,star from email where id='%s'"%(mid)
+	sql="select id,send_email,recv_email,subject,body,date,spam,star,send_eread,recv_eread from email where id='%s'"%(mid)
 	cursor.execute(sql)
 	rows=cursor.fetchall()
 	
@@ -191,7 +192,7 @@ def add__get_reply():
 		#updating the main thread email_read column
 		sql="select send_email,recv_email from email where id=%s"%(request.form["mid"])
 		if(cursor.execute(sql)>0):
-			data=cursor.fetchall()
+			data=cursor.fetchall()[0]
 			if(data["send_email"]==request.form["recv_email"]):
 				sql="update email set send_eread=0 where id=%s"%(mid)
 			else:
@@ -301,14 +302,14 @@ def star(mid):
 		return resp
 
 
-#checkc whether a mmail is read or not
+#checkc whether a mail is read or not
 @app.route("/email_read/<mid>/<email>",methods=["GET","POST"])
 def email_read(mid,email):
 	if(request.method=="GET"):
 		#chekc who has sent the mail to whome
 		sql="select send_email,recv_email,send_eread,recv_eread from email where id=%s"%(mid);
 		if(cursor.execute(sql)>0):
-			data=cursor.fetchall()
+			data=cursor.fetchall()[0]
 			if(email==data["recv_email"]):
 				message=[data["recv_eread"]]
 			else:
