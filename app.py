@@ -193,6 +193,7 @@ def add__get_reply():
 		resp.status_code=200
 		return resp
 	elif(request.method=="GET"):
+		
 		mid=int(request.args["mid"])
 		reply_id=request.args["id"]
 		for i in range(10):
@@ -203,11 +204,17 @@ def add__get_reply():
 			if(cursor.execute(sql)>0):
 				resp=jsonify(cursor.fetchall())
 				resp.status_code=200
+				
 				return resp
 			time.sleep(1)
+
 		resp=jsonify({})
 		resp.status_code=400
 		return  resp
+	else:
+		resp=jsonify({})
+		resp.status_code=400
+		return resp
 
 
 	
