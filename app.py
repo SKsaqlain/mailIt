@@ -289,11 +289,16 @@ def delete_mail(mid):
 	
 	mail_id=mid
 	print(mail_id)
-	sql="delete from spam_check_log where id='%s'"%(mail_id)
-	if(cursor.execute(sql)>0):
-		print("deleted from spam_check_log")
-		db.commit()
-	sql="delete from email where id='%s'"%(mail_id)
+	sql="delete from spam_check_log where id=%s"%(mail_id)
+	try:
+		if(cursor.execute(sql)>0):
+			print("deleted from spam_check_log")
+			db.commit()
+		else:
+			pass
+	except:
+		pass
+	sql="delete from email where id=%s"%(mail_id)
 	if(cursor.execute(sql)>0):
 		print("mail deleted")
 		db.commit()
@@ -304,7 +309,7 @@ def delete_mail(mid):
 		resp=jsonify({})
 		resp.status_code=400
 		return  resp
-
+	
 #function to star or un-star a mail
 @app.route("/star/<mid>",methods=["GET"])
 def star(mid):
