@@ -17,6 +17,7 @@
 				send_email=null;
 				recv_email=null;
 				reply_id=null;
+				time=null;
 				function createTR(){var tr=document.createElement("tr");return tr;}
 				function createTD(data)
 				{
@@ -90,7 +91,7 @@
 
 						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
 						mark_main_thread_read();
-						display_reply();
+						time=setTimeout(display_reply);
 						generate_reply_form();
 
 						}
@@ -106,7 +107,7 @@
 			{
 				var xhr=new XMLHttpRequest();
 				//the receiver becomes sender here 
-				xhr.open("POST","/email/"+mid+"/"+send_email,true);
+				xhr.open("POST","/email_read/"+mid+"/"+send_email,true);
 				xhr.onload=function()
 				{
 					if(this.status==200)
@@ -187,7 +188,7 @@
 				}
 
 			}
-
+			
 			function display_reply()
 			{	//alert("herre");
 				var div_reply=document.getElementById("reply_disp");
@@ -227,9 +228,8 @@
 						
 
 					}
-						xhr.abort();
-						display_reply(reply_id);
-					
+					clearTimeout(time);
+					time=setTimeout(display_reply);
 				}
 				xhr.send();
 			}
