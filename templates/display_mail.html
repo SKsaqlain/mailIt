@@ -89,7 +89,7 @@
 						main_thread.appendChild(tr);
 
 						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
-						
+						mark_main_thread_read();
 						display_reply();
 						generate_reply_form();
 
@@ -102,6 +102,24 @@
 					xhr.send();
 
 				}
+			function mark_main_thread_read()
+			{
+				var xhr=new XMLHttpRequest();
+				//the receiver becomes sender here 
+				xhr.open("POST","/email/"+mid+"/"+send_email,true);
+				xhr.onload=function()
+				{
+					if(this.status==200)
+					{
+						console.log("updated db");
+					}
+					else
+					{
+						console.log("some error");
+					}
+				}
+				xhr.send();
+			}
 
 			//function  to upload comments
 			function generate_reply_form()
