@@ -36,6 +36,9 @@ button{
 	
 	
 }
+td{
+	width:150px;
+}
 
 
 
@@ -89,9 +92,10 @@ table{
 							{
 								var mail=data[i];
 								var division=document.createElement("div");
+								division.classList="rmail-div";
 								var table=document.createElement("table");
 								// division.appendChild(table);
-								division.classList="rmail-div";
+								
 								table.id=mail["id"];
 								
                                 
@@ -226,7 +230,8 @@ function getlatestdata()
 			if(data.length>0)
 			{
 				for(var i=data.length-1;i>=0;i--)
-				{
+				{	var division=document.createElement("div");
+					division.classList="rmail-div";
 					var mail=data[i];
 					var table=document.createElement("table");
 					table.id=mail["id"];
@@ -330,8 +335,10 @@ function getlatestdata()
 						xhr.send();
 						this.parentNode.removeChild(this);
 					}
+					division.appendChild(table);
 					rmail_disp.insertBefore(button,rmail_disp.childNodes[0]);
-					rmail_disp.insertBefore(table,rmail_disp.childNodes[0]);
+					rmail_disp.insertBefore(division,rmail_disp.childNodes[0]);
+
 				}
 			}
 					
