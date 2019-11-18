@@ -36,6 +36,19 @@ button{
 	
 	
 }
+
+#signout {
+ 	background-color: rgb(255, 0, 0);
+ 	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+    color:white;
+    margin-top: 12px;
+    margin-right: 1%;
+	padding:10px;
+	
+	cursor: pointer;
+ }
 td{
 	width:150px;
 }
@@ -62,6 +75,9 @@ table{
 	text-align: center;
 }
 .rmail-div:hover{background-color: rgb(0, 255, 242);}
+
+ 
+
 </style>
 
 </head>
@@ -73,6 +89,11 @@ table{
 	flag=0
 	email=localStorage.getItem("email");
 	//function to display email data
+	function signout()
+	{
+		localStorage.clear();
+		window.location.assign('/');
+	}
 	function getData()
 		{	//user state information is stored in localStorage
 			
@@ -360,6 +381,9 @@ function compose(){
 <body onload="getData()">
 	<div>
         <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
+    </div>
+    <div>
+    	<button id="signout" onclick="signout()">SIGNOUT</button>
     </div>
     <div id="rmail_disp" class="rmail">
     </div>
