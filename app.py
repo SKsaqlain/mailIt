@@ -237,9 +237,10 @@ def add__get_reply():
 				sql="update email set send_eread=1 and recv_eread=1 where id=%s"%(mid)
 				if(cursor.execute(sql)>0):
 					print("read column modified")
-					db.commit()
+					
 				else:
 					print("unable to modify read column")
+				db.commit()
 				resp.status_code=200
 				
 				return resp
@@ -271,15 +272,16 @@ def compose_send():
 			id_=int(cursor.fetchone()['max(id)'])+1
 	except:
 		pass
-	sql="insert into email(id,send_email,recv_email,subject,body) values(%d,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
+	sql="insert into email(id,send_email,recv_email,subject,body) values(%s,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
 	if(cursor.execute(sql)>0):
 		print("email sent")
-		db.commit()
+	db.commit()
+	time.sleep(1)
 	#inserting data into spam_log database  to be check for later
-	sql="insert into spam_check_log values('%d')"%(id_)
+	sql="insert into spam_check_log(id) values(%s)"%(id_)
 	if(cursor.execute(sql)>0):
 		print("emailed logged for further check")
-		db.commit()
+	db.commit()
 	resp=jsonify({})
 	resp.status_code=200
 	return resp
@@ -359,15 +361,16 @@ def email_read(mid,email):
 				sql="update email set recv_eread=1 where id=%s"%(mid);
 			else:
 				sql="update email set send_eread=1 where id=%s"%(mid);
+			resp=" "
 			if(cursor.execute(sql)>0):
-				db.commit()
 				resp=jsonify()
 				resp.status_code=200
-				return resp
+				
 			else:
 				resp=jsonify()
 				resp.status_code=400
-				return resp
+			db.commit()
+			return resp
 		else:
 			resp=jsonify()
 			resp.status_code=400
