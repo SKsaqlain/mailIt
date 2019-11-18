@@ -454,4 +454,4 @@ def spam_check():
 
 # t=threading.Thread(target=spam_check)
 # t.start()
-app.run(debug=True,host="0.0.0.0",port=1000)
+app.run(debug=True,host="0.0.0.0",port=1000,threaded=True)
