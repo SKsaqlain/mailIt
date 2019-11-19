@@ -68,6 +68,7 @@ td{
 				recv_email=null;
 				reply_id=null;
 				time=null;
+				email=localStorage.getItem("email");
 				function createTR(){var tr=document.createElement("tr");return tr;}
 				function createTD(data)
 				{
@@ -126,8 +127,14 @@ td{
 							// document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
 
 							//sender becomes receiver and receiver becomes sender
-							send_email=data["recv_email"];
-							recv_email=data["send_email"];
+
+							//send_email=data["recv_email"];
+							send_email=email;
+							if(email==data["send_email"])
+								recv_email=data["recv_email"]
+							else:
+								recv_email=data["send_email"]
+							
 							console.log(send_email);
 							console.log(recv_email);
 						// var mail_body=document.getElementById("mail_body");

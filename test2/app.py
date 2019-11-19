@@ -548,7 +548,7 @@ def upload_file():
 			return resp
 
 def spam_check():
-	while(1):
+	for _ in range(10):
 		db=pymysql.connect('127.0.0.1','root','',"mailIt")
 		cursor=db.cursor()
 		print("Spam check active")
@@ -580,6 +580,7 @@ def spam_check():
 				if(cursor.execute(sql)>0):
 					print("spam set")
 				db.commit()
+
 				
 				#deleting entires from  spma_check_log file
 				sql="delete from spam_check_log where id in ('%s')"%(','.join(list(map(str,spam_id))))
@@ -592,8 +593,9 @@ def spam_check():
 		time.sleep(10)
 		print("Spam check done")
 		db.close()
+		return 
 
 
-# t=threading.Thread(target=spam_check)
-# t.start()
+t=threading.Thread(target=spam_check)
+t.start()
 app.run(debug=True,host="0.0.0.0",port=1000)
